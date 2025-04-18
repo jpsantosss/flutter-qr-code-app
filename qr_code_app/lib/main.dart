@@ -28,8 +28,8 @@ class MainMenu extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => QRScannerPage()));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => QRScannerPage()));
           },
           child: Text("SCANEAR QR CODE"),
         ),
@@ -78,7 +78,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
   @override
   Widget build(BuildContext context) {
     if (scannedData != null) {
-      return ModelViewerScreen(modelUrl: scannedData!);
+      return const ModelViewerScreen(modelUrl: 'assets/models/cat.glb');
     }
 
     return Scaffold(

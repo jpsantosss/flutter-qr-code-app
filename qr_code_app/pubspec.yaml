@@ -26,5 +26,5 @@ dev_dependencies:
 
 flutter:
   assets:
-   - assets/models/cat.obj
+   - assets/models/cat.glb
   uses-material-design: true
