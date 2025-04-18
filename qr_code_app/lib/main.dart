@@ -1,57 +1,70 @@
-import 'package:ar_flutter_plugin/datatypes/node_types.dart';
-import 'package:ar_flutter_plugin/models/ar_node.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: HomeScreen(),
-  ));
+  runApp(MyApp());
 }
 
-class HomeScreen extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'QR Code 3D Viewer',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MainMenu(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class MainMenu extends StatelessWidget {
+  const MainMenu({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Menu Principal")),
+      appBar: AppBar(title: Text("Menu Principal")),
       body: Center(
         child: ElevatedButton(
-          child: const Text("SCANEAR QR CODE"),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => QRScannerScreen()),
-            );
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => QRScannerPage()));
           },
+          child: Text("SCANEAR QR CODE"),
         ),
       ),
     );
   }
 }
 
-class QRScannerScreen extends StatefulWidget {
+class QRScannerPage extends StatefulWidget {
+  const QRScannerPage({super.key});
+
   @override
-  State<QRScannerScreen> createState() => _QRScannerScreenState();
+  State<QRScannerPage> createState() => _QRScannerPageState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+class _QRScannerPageState extends State<QRScannerPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
-  bool scanned = false;
+  String? scannedData;
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (!scanned) {
-        setState(() => scanned = true);
-        controller.pauseCamera();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => ARViewScreen()),
-        );
+  @override
+  void reassemble() {
+    super.reassemble();
+    controller?.pauseCamera();
+    controller?.resumeCamera();
+  }
+
+  void _onQRViewCreated(QRViewController ctrl) {
+    controller = ctrl;
+    ctrl.scannedDataStream.listen((scanData) {
+      if (scannedData == null) {
+        setState(() {
+          scannedData = scanData.code;
+        });
+        controller?.pauseCamera();
       }
     });
   }
@@ -64,7 +77,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (scannedData != null) {
+      return ModelViewerScreen(modelUrl: scannedData!);
+    }
+
     return Scaffold(
+      appBar: AppBar(title: Text('QR Code Scanner')),
       body: QRView(
         key: qrKey,
         onQRViewCreated: _onQRViewCreated,
@@ -73,38 +91,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 }
 
-class ARViewScreen extends StatefulWidget {
-  @override
-  State<ARViewScreen> createState() => _ARViewScreenState();
-}
+class ModelViewerScreen extends StatelessWidget {
+  final String modelUrl;
 
-class _ARViewScreenState extends State<ARViewScreen> {
+  const ModelViewerScreen({required this.modelUrl, super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Visualizador 3D")),
-      body: ARView(
-        onARViewCreated: onARViewCreated,  // A função agora recebe ARViewController
+      appBar: AppBar(title: Text('Modelo 3D')),
+      body: ModelViewer(
+        src: modelUrl, // Exemplo: "https://modelos.com/modelo.glb"
+        alt: "Modelo escaneado",
+        ar: true,
+        autoRotate: true,
+        cameraControls: true,
+        backgroundColor: Colors.white,
       ),
     );
-  }
-
-  void onARViewCreated(ARViewController arViewController) {
-    final arSessionManager = arViewController.sessionManager;
-    final arObjectManager = arViewController.objectManager;
-
-    arSessionManager.onInitialize().then((_) {
-      arObjectManager.onInitialize().then((_) {
-        final node = ARNode(
-          type: NodeType.localGLTF2,
-          uri: "assets/models/modelo.glb",
-          scale: Vector3(0.5, 0.5, 0.5),
-          position: Vector3(0.0, 0.0, -1.0),
-          rotation: Vector4(0.0, 0.0, 0.0, 1.0),
-        );
-
-        arObjectManager.addNode(node);
-      });
-    });
   }
 }
