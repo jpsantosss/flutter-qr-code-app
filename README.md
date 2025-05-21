@@ -1,16 +1,19 @@
-# qr_code_app
+# 📱 Flutter QR Code App
 
-A new Flutter project.
+A simple and effective Flutter application for scanning QR codes using the device camera.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## ✨ Features
 
-A few resources to get you started if this is your first Flutter project:
+- Real-time QR code scanning
+- Cross-platform support (Android & iOS)
+- Clean and minimalistic UI
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Technologies Used
+
+- **Flutter**: UI toolkit by Google
+- **Dart**: Programming language for Flutter
+- **qr_code_scanner**: Flutter plugin for scanning QR codes
